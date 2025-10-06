@@ -1,0 +1,6 @@
+#ifndef LIB_CODECOACH_LIBRARY_H
+#define LIB_CODECOACH_LIBRARY_H
+
+void hello();
+
+#endif // LIB_CODECOACH_LIBRARY_H
