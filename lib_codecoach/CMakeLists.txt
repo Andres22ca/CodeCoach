@@ -4,7 +4,7 @@ project(lib_codecoach)
 set(CMAKE_CXX_STANDARD 20)
 
 add_library(lib_codecoach STATIC library.cpp
-        contracts/problem_dt.h
+        contracts/problem_dto.h
         contracts/eval_dto.h
         contracts/analyzer_dto.h
         contracts/sandbox_contract.h
@@ -23,10 +23,10 @@ add_library(lib_codecoach STATIC library.cpp
         sdk/llm_client_openai.h
         config/config_manager.cpp
         config/config_manager.h
-        errors/exeptions.h
+        errors/exceptions.h
         logging/logger.cpp
         logging/logger.h
         metrics/timer.cpp
         metrics/timer.h
-        prompts/coach_promtps.cpp
-        prompts/coach_promtps.h)
+        prompts/coach_prompts.cpp
+        prompts/coach_prompts.h)

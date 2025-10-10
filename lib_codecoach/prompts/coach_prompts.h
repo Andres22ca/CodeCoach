@@ -6,7 +6,7 @@
 #define LIB_CODECOACH_COACH_PROMTPS_H
 
 
-class coach_promtps {
+class coach_prompts {
 };
 
 
