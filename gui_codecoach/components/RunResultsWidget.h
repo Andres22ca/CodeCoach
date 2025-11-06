@@ -6,7 +6,7 @@
 #define GUI_CODECOACH_RUNRESULTSWIDGETS_H
 
 
-class RunResultsWidgets {
+class RunResultsWidget {
 };
 
 

@@ -37,6 +37,10 @@ add_library(lib_codecoach STATIC
         logging/logger.h
         metrics/timer.h
         prompts/coach_prompts.h
+        sdk/dto/ProblemSummary.h
+        sdk/dto/ProblemDetail.h
+        sdk/dto/RunResults.h
+        sdk/dto/CoachFeedback.h
 )
 
 # Rutas de include públicas (tus headers están directamente bajo shared/)
