@@ -5,10 +5,30 @@
 #ifndef LIB_CODECOACH_ANALYZER_CLIENT_H
 #define LIB_CODECOACH_ANALYZER_CLIENT_H
 
+#include "contracts/analyzer_dto.h"
+#include "contracts/eval_dto.h"
+#include "contracts/problem_dto.h"
+#include "http/http_client.h"
+#include <string>
 
-class analyzer_client {
-};
+namespace cc::sdk {
 
+    class AnalyzerClient {
+    private:
+        http::HttpClient httpClient_;
+        std::string baseUrl_;
+
+    public:
+        explicit AnalyzerClient(const std::string& baseUrl);
+
+        // Analizar código y obtener feedback del LLM
+        contracts::CoachFeedback analyze(
+            const std::string& code,
+            const contracts::RunResult& evalResult,
+            const std::string& problemId
+        );
+    };
+
+} // namespace cc::sdk
 
 #endif //LIB_CODECOACH_ANALYZER_CLIENT_H
-// implementar el analyze al llm
