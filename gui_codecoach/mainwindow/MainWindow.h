@@ -1,10 +1,7 @@
-//
 // Created by andres on 4/11/25.
 //
 
-#ifndef CODECOACH_MAINWINDOW_H
-#define CODECOACH_MAINWINDOW_H
-
+#pragma once
 #include <QMainWindow>
 
 class QTabWidget;
@@ -32,23 +29,23 @@ public:
     explicit MainWindow(QWidget* parent = nullptr);
 
 private:
-    // --- Ciclo de construcción (sin implementación aún) ---
-    void setupLayout();           // crea splitters, tabs, widgets
+    // --- Ciclo de construcción ---
+    void setupLayout();           // crea splitters, tabs y widgets
     void buildMenusAndActions();  // crea menús, acciones y toolbars
     void connectSignals();        // conecta señales/slots entre widgets
-    void bindViewModels();        // suscribe UI <-> ViewModels
-    void loadInitialData();       // carga datos iniciales (mock más adelante)
+    void bindViewModels();        // enlaza UI <-> ViewModels
+    void loadInitialData();       // carga datos iniciales (mock)
 
     // --- Widgets raíz ---
-    QSplitter* rootSplit_ = nullptr;   // Izq: problemas  | Der: tabs
-    QTabWidget* rightTabs_ = nullptr;  // Editor | Resultados | Coach
+    QSplitter*   rootSplit_  = nullptr; // Izq: lista | Der: tabs
+    QTabWidget*  rightTabs_  = nullptr; // Enunciado | Editor | Resultados | Coach
 
     // --- Widgets de contenido ---
-    ProblemListWidget*    problemList_    = nullptr;
-    ProblemDetailWidget*  problemDetail_  = nullptr; // va arriba del editor o en splitter vertical
-    CodeEditorWidget*     codeEditor_     = nullptr;
-    RunResultsWidget*     runResults_     = nullptr;
-    CoachFeedbackWidget*  coachFeedback_  = nullptr;
+    ProblemListWidget*    problemList_    = nullptr; // panel izquierdo
+    ProblemDetailWidget*  problemDetail_  = nullptr; // pestaña 0
+    CodeEditorWidget*     codeEditor_     = nullptr; // pestaña 1
+    RunResultsWidget*     runResults_     = nullptr; // pestaña 2
+    CoachFeedbackWidget*  coachFeedback_  = nullptr; // pestaña 3
 
     // --- ViewModels ---
     cc::vm::ProblemViewModel* problemVM_ = nullptr;
@@ -57,30 +54,28 @@ private:
     cc::vm::CoachViewModel*   coachVM_   = nullptr;
 
     // --- Menús, acciones y barras ---
-    QMenu* menuFile_ = nullptr;
-    QMenu* menuRun_  = nullptr;
-    QMenu* menuView_ = nullptr;
-    QMenu* menuHelp_ = nullptr;
+    QMenu*    menuFile_ = nullptr;
+    QMenu*    menuRun_  = nullptr;
+    QMenu*    menuView_ = nullptr;
+    QMenu*    menuHelp_ = nullptr;
 
     QToolBar* mainToolbar_ = nullptr;
 
-    QAction* actNew_      = nullptr;
-    QAction* actOpen_     = nullptr;
-    QAction* actSave_     = nullptr;
-    QAction* actExit_     = nullptr;
+    QAction* actNew_    = nullptr;
+    QAction* actOpen_   = nullptr;
+    QAction* actSave_   = nullptr;
+    QAction* actExit_   = nullptr;
 
-    QAction* actRun_      = nullptr;   // Ctrl+Enter
-    QAction* actCancel_   = nullptr;
+    QAction* actRun_    = nullptr;   // Ctrl+Enter
+    QAction* actCancel_ = nullptr;
 
-    QAction* actToggleLeftPane_ = nullptr; // mostrar/ocultar lista de problemas
+    QAction* actToggleLeftPane_ = nullptr; // mostrar/ocultar lista
     QAction* actToggleTheme_    = nullptr; // claro/oscuro (stub)
 
-    QAction* actAbout_    = nullptr;
+    QAction* actAbout_  = nullptr;
 
     // --- Conveniencias ---
-    enum TabIndex { TabEditor = 0, TabResults = 1, TabCoach = 2 };
-    void switchToResultsTab();  // helper privado (lo implementarás luego)
+    enum TabIndex { TabDetail = 0, TabEditor = 1, TabResults = 2, TabCoach = 3 };
+    void switchToResultsTab();
     void switchToCoachTab();
 };
-
-#endif // CODECOACH_MAINWINDOW_H

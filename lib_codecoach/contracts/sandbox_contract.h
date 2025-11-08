@@ -62,9 +62,6 @@ namespace cc::sandbox {
     };
 }
 
-
-
-
 #endif //LIB_CODECOACH_SANDBOX_CONTRACT_H
 
 // definir estructura para moror de evaluacion

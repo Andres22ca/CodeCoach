@@ -31,10 +31,6 @@ namespace cc::contracts {
 }
 
 
-
-
-
-
 #endif //LIB_CODECOACH_PROBLEM_DT_H
 
 //Para definir los problemas con su input

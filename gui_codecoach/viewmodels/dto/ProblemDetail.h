@@ -1,6 +1,4 @@
-//
-// Created by andres on 5/11/25.
-//
+
 
 #ifndef CODECOACH_PROBLEMDETAIL_H
 #define CODECOACH_PROBLEMDETAIL_H

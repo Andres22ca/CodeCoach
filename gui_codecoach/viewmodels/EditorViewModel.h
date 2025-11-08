@@ -1,6 +1,3 @@
-//
-// Created by andres on 6/11/25.
-//
 
 #ifndef CODECOACH_EDITORVIEWMODEL_H
 #define CODECOACH_EDITORVIEWMODEL_H

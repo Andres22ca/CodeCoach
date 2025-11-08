@@ -1,6 +1,3 @@
-//
-// Created by andres on 5/11/25.
-//
 
 #ifndef CODECOACH_COACHFEEDBACK_H
 #define CODECOACH_COACHFEEDBACK_H

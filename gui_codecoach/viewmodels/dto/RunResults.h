@@ -1,6 +1,4 @@
-//
-// Created by andres on 5/11/25.
-//
+
 
 #ifndef CODECOACH_RUNRESULTS_H
 #define CODECOACH_RUNRESULTS_H
