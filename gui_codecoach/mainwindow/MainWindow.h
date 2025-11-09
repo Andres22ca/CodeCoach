@@ -1,6 +1,4 @@
-// Created by andres on 4/11/25.
-//
-
+//hola
 #pragma once
 #include <QMainWindow>
 
