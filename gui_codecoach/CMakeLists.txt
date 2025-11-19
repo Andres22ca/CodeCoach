@@ -20,8 +20,8 @@ add_executable(gui_codecoach
         # Components
         components/ProblemListWidget.cpp
         components/ProblemListWidget.h
-        components/ProblemDetailWidget.cpp
-        components/ProblemDetailWidget.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/components/ProblemDetailWidget.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/components/ProblemDetailWidget.h
         components/CodeEditorWidget.cpp
         components/CodeEditorWidget.h
         components/RunResultsWidget.cpp
@@ -44,8 +44,15 @@ add_executable(gui_codecoach
         viewmodels/dto/CoachFeedback.h
 )
 
+set_target_properties(gui_codecoach PROPERTIES
+        AUTOMOC ON
+        AUTOUIC ON
+        AUTORCC ON
+)
+
 target_link_libraries(gui_codecoach
         PRIVATE
         Qt6::Widgets
         Qt6::Network
 )
+
