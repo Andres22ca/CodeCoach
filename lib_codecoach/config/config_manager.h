@@ -1,4 +1,3 @@
-//
 // Created by andres on 5/10/25.
 //
 
@@ -7,10 +6,8 @@
 
 #include <string>
 
-
 namespace cc::config {
 
-    // Tipos
     struct Endpoints {
         std::string problems;
         std::string eval;
@@ -29,11 +26,9 @@ namespace cc::config {
 
     // API principal
     const Config& get();                 // Devuelve referencia a la configuración cargada (cacheada)
-    void reload();                       // Fuerza releer el entorno
+    void reload();                       // Fuerza releer el entorno (no hace nada si set_for_tests() activo)
     void set_for_tests(const Config&);   // Inyecta una configuración (para pruebas)
-
-    // No declares cc::errors aquí; ya lo estás incluyendo
-    // Si ocurre un error, las funciones lanzarán cc::errors::ConfigError
+    void unset_for_tests();              // Desactiva el modo test y deja que get()/reload() usen el entorno
 
 } // namespace cc::config
 

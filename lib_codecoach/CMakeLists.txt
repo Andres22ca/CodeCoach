@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.20)
-project(lib_codecoach CXX)
+project(codecoach CXX)
 
-# Estándar y PIC
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# Librería
+# -----------------------------
+#  LA LIBRERÍA
+# -----------------------------
 add_library(lib_codecoach STATIC
-        # Fuentes (.cpp)
         http/http_client.cpp
         http/http_response.cpp
         sdk/problems_client.cpp
@@ -37,25 +37,28 @@ add_library(lib_codecoach STATIC
         logging/logger.h
         metrics/timer.h
         prompts/coach_prompts.h
-        sdk/dto/ProblemSummary.h
-        sdk/dto/ProblemDetail.h
-        sdk/dto/RunResults.h
-        sdk/dto/CoachFeedback.h
 )
 
-# Rutas de include públicas (tus headers están directamente bajo shared/)
 target_include_directories(lib_codecoach
         PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-# (Opcional) Warnings útiles
 if (MSVC)
     target_compile_options(lib_codecoach PRIVATE /W4 /permissive-)
 else()
     target_compile_options(lib_codecoach PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
-# (Opcional) Aquí enlazarás deps cuando las agregues:
-# find_package(nlohmann_json CONFIG REQUIRED)
-# target_link_libraries(lib_codecoach PUBLIC nlohmann_json::nlohmann_json)
+
+# -----------------------------
+#  EL EJECUTABLE DE PRUEBA
+# -----------------------------
+add_executable(codecoach_smoke
+        tests/smoke_main.cpp
+)
+
+# Enlazar la librería al ejecutable
+target_link_libraries(codecoach_smoke
+        PRIVATE lib_codecoach
+)
