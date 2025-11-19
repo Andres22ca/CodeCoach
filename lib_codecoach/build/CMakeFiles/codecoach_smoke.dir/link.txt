@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/codecoach_smoke.dir/tests/smoke_main.cpp.o -o codecoach_smoke  liblib_codecoach.a 

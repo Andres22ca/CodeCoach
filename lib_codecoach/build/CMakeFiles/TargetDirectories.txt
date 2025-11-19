@@ -1,0 +1,4 @@
+/home/andres/CLionProjects/codecoach/lib_codecoach/build/CMakeFiles/lib_codecoach.dir
+/home/andres/CLionProjects/codecoach/lib_codecoach/build/CMakeFiles/codecoach_smoke.dir
+/home/andres/CLionProjects/codecoach/lib_codecoach/build/CMakeFiles/edit_cache.dir
+/home/andres/CLionProjects/codecoach/lib_codecoach/build/CMakeFiles/rebuild_cache.dir
