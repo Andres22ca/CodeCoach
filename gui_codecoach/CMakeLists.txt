@@ -4,13 +4,11 @@ project(gui_codecoach LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Necesario para Q_OBJECT, .ui, .qrc
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
+
 find_package(Qt6 6.4.2 REQUIRED COMPONENTS Widgets Network)
-
-
 
 add_executable(gui_codecoach
         main.cpp
@@ -22,8 +20,8 @@ add_executable(gui_codecoach
         # Components
         components/ProblemListWidget.cpp
         components/ProblemListWidget.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/components/ProblemDetailWidget.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/components/ProblemDetailWidget.h
+        components/ProblemDetailWidget.cpp
+        components/ProblemDetailWidget.h
         components/CodeEditorWidget.cpp
         components/CodeEditorWidget.h
         components/RunResultsWidget.cpp
@@ -44,12 +42,6 @@ add_executable(gui_codecoach
         viewmodels/dto/ProblemDetail.h
         viewmodels/dto/RunResults.h
         viewmodels/dto/CoachFeedback.h
-)
-
-set_target_properties(gui_codecoach PROPERTIES
-        AUTOMOC ON
-        AUTOUIC ON
-        AUTORCC ON
 )
 
 target_link_libraries(gui_codecoach
