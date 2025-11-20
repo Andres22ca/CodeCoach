@@ -7,6 +7,7 @@
 
 #include "contracts/eval_dto.h"
 #include "http/http_client.h"
+
 #include <string>
 #include <optional>
 
@@ -15,7 +16,7 @@ namespace cc::sdk {
     class EvalClient {
     private:
         http::HttpClient httpClient_;
-        std::string baseUrl_;
+        std::string      baseUrl_;
 
     public:
         explicit EvalClient(const std::string& baseUrl);
@@ -29,4 +30,4 @@ namespace cc::sdk {
 
 } // namespace cc::sdk
 
-#endif //LIB_CODECOACH_EVAL_CLIENT_H
+#endif // LIB_CODECOACH_EVAL_CLIENT_H

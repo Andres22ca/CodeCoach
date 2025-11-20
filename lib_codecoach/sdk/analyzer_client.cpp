@@ -1,56 +1,39 @@
-#include "analyzer_client.h"
-#include "logging/logger.h"
+//
+// Created by andres on 5/10/25.
+//
 
-namespace cc::sdk {
+#ifndef LIB_CODECOACH_ANALYZER_DTO_H
+#define LIB_CODECOACH_ANALYZER_DTO_H
 
-    AnalyzerClient::AnalyzerClient(const std::string& baseUrl)
-        : baseUrl_(baseUrl) {
-        httpClient_.setTimeout(60000); // 60 segundos para el LLM
-        httpClient_.setDefaultHeader("Content-Type", "application/json");
-    }
+#include <string>
+#include <vector>
 
-    contracts::CoachFeedback AnalyzerClient::analyze(
-        const std::string& code,
-        const contracts::RunResult& evalResult,
-        const std::string& problemId
-    ) {
-        std::string url = baseUrl_ + "/analyze";
+namespace cc::contracts {
 
-        logging::Logger::info("Requesting code analysis");
+    struct AlgorithmGuess {
+        std::string name;
+        int confidence; // 0–100
+    };
 
-        contracts::CoachFeedback feedback;
-        feedback.algorithm.name = "Unknown";
-        feedback.algorithm.confidence = 0;
-        feedback.complexity.time = "O(?)";
-        feedback.complexity.space = "O(?)";
-        feedback.nextStep = "Analysis unavailable";
-        feedback.commonMistake = "";
+    struct ComplexityEstimate { // nombre con mayúscula consistente
+        std::string time;   // e.g. "O(n log n)"
+        std::string space;  // e.g. "O(n)"
+    };
 
-        try {
-            // NOTA: En producción, crear JSON request con:
-            // - code
-            // - evalResult (serializado)
-            // - problemId
-            std::string jsonBody = "{}"; // Stub
+    struct CoachHint {
+        std::string title;  // <- aquí estaba "tile" antes
+        std::string body;
+        int level;          // 1 = básico, 2 = intermedio, etc.
+    };
 
-            auto response = httpClient_.post(url, jsonBody);
+    struct CoachFeedback {
+        std::vector<CoachHint> hints; // máx. 3
+        std::string nextStep;
+        std::string commonMistake;
+        ComplexityEstimate complexity;  // <- tipo correcto
+        AlgorithmGuess     algorithm;
+    };
 
-            if (!response.isSuccess()) {
-                logging::Logger::error("Analysis failed: " + std::to_string(response.statusCode));
-                feedback.nextStep = "Analysis service error";
-                return feedback;
-            }
+} // namespace cc::contracts
 
-            // NOTA: En producción, parsear response como JSON y llenar feedback
-            logging::Logger::info("Code analyzed successfully");
-
-            return feedback;
-
-        } catch (const std::exception& e) {
-            logging::Logger::error("Exception in AnalyzerClient::analyze: " + std::string(e.what()));
-            feedback.nextStep = "Exception during analysis";
-            return feedback;
-        }
-    }
-
-} // namespace cc::sdk
+#endif // LIB_CODECOACH_ANALYZER_DTO_H

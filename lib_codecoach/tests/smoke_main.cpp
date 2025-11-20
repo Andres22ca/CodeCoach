@@ -6,7 +6,7 @@
 #include "config/config_manager.h"
 #include "http/http_client.h"
 #include "http/http_response.h"
-#include "prompts/coach_prompts.h"p
+#include "prompts/coach_prompts.h"
 #include "contracts/problem_dto.h"
 #include "contracts/eval_dto.h"
 
