@@ -1,14 +1,13 @@
-//
-// Created by andres on 6/10/25.
-//
-
-
 #ifndef CODECOACH_RUNVIEWMODEL_H
 #define CODECOACH_RUNVIEWMODEL_H
 
 #include <QObject>
 #include <QString>
 #include "dto/RunResults.h"
+
+namespace cc::dto {
+    struct RunResults;
+}
 
 namespace cc::vm {
 
@@ -17,27 +16,33 @@ namespace cc::vm {
     public:
         explicit RunViewModel(QObject* parent = nullptr);
 
-        // --- API pública ---
-        void run(const QString& code, const QString& problemId);  // Inicia una ejecución
-        void cancel();                                            // Cancela la ejecución actual
-        void clear();                                             // Limpia resultados previos
+        // MainWindow lo llama así: run(pid, code)
+        void run(const QString& problemId, const QString& code);
 
-        // --- Accesores ---
-        cc::dto::RunResults results() const;                      // Devuelve el último resultado
-        bool isRunning() const;                                   // Indica si hay ejecución activa
-        int progress() const;                                     // Progreso (0-100%)
+        // ★ ESTA ES LA QUE FALTABA
+        void cancel();
+
+        void clear();
+
+        cc::dto::RunResults results() const;
+        bool isRunning() const;
+        int  progress() const;
 
         signals:
-            // --- Señales hacia la UI ---
-            void runningChanged(bool running);                        // Comienza o termina ejecución
-        void progressChanged(int progress);                       // Progreso incremental
-        void resultsReady(const cc::dto::RunResults& results);    // Resultados listos
-        void errorOccurred(const QString& message);               // Error genérico
+            void runningChanged(bool running);
+        void progressChanged(int progress);
+        void resultsReady(const cc::dto::RunResults& results);
+        void errorOccurred(const QString& message);
+
+        void stdOut(const QString& text);
+        void stdErr(const QString& text);
 
     private:
-        // --- Estado interno ---
+        void setRunning(bool running);
+        void setProgress(int p);
+
         bool running_ = false;
-        int progress_ = 0;
+        int  progress_ = 0;
         cc::dto::RunResults lastResults_;
     };
 

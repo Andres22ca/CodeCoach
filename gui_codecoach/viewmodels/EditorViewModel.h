@@ -1,4 +1,3 @@
-
 #ifndef CODECOACH_EDITORVIEWMODEL_H
 #define CODECOACH_EDITORVIEWMODEL_H
 
@@ -13,37 +12,46 @@ namespace cc::vm {
     public:
         explicit EditorViewModel(QObject* parent = nullptr);
 
-        //  API principal
-        void setProblem(const cc::dto::ProblemDetail& problem); // Cambia el problema activo
-        void setCode(const QString& code);                       // Establece el código actual
-        QString code() const;                                    // Devuelve el código actual
+        // ----------------------
+        // ★ API PRINCIPAL
+        // ----------------------
 
-        void setLanguage(const QString& lang);                   // para progra
+        // ***** NECESARIO PARA MainWindow.cpp *****
+        void loadStarterFor(const QString& id);
+        // ******************************************
+
+        // ***** NECESARIO PARA MainWindow.cpp *****
+        // Cuando generamos el starter enviamos código a CodeEditorWidget
+        signals:
+            void codeReady(const QString& code);
+        // ******************************************
+
+        // Otros métodos existentes
+        void setProblem(const cc::dto::ProblemDetail& problem);
+        void setCode(const QString& code);
+        QString code() const;
+
+        void setLanguage(const QString& lang);
         QString language() const;
 
-        void reset();                                            // Limpia/recarga código inicial del problema
-        void format();                                           // Formateo (stub por ahora)
-        void insertSnippet(const QString& snippet);              // Inserta texto/snippet
+        void reset();
+        void format();
+        void insertSnippet(const QString& snippet);
 
-        // --- Estado de guardado ---
-        bool isDirty() const;            // Hay cambios sin guardar?
-        void markSaved();                // Marca como guardado (dirty=false)
+        bool isDirty() const;
+        void markSaved();
 
         signals:
-            // Notificaciones para la UI / otros VMs
             void problemChanged(const cc::dto::ProblemDetail& problem);
         void codeChanged(const QString& code);
         void languageChanged(const QString& lang);
         void dirtyChanged(bool dirty);
 
     private:
-        // --- Estado interno mínimo (sin lógica en el header) ---
         cc::dto::ProblemDetail currentProblem_;
         QString code_;
         QString language_ = QStringLiteral("C++17");
         bool dirty_ = false;
-
-        // Bandera para evitar bucles al sincronizar con el widget (UI <-> VM)
         bool updating_ = false;
     };
 

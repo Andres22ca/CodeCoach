@@ -3,14 +3,12 @@
 #define GUI_CODECOACH_PROBLEMLISTWIDGET_H
 
 #include <QListWidget>
-#include <QVector>
 #include <QString>
 
-class QListWidgetItem;   // forward declaration
+class QListWidgetItem;
 
 namespace cc::dto {
     struct ProblemSummary;
-    struct ProblemDetail;
 }
 
 class ProblemListWidget : public QListWidget {
@@ -22,13 +20,11 @@ public slots:
     void setProblems(const QVector<cc::dto::ProblemSummary>& list);
 
     signals:
-        void problemChosen(const cc::dto::ProblemDetail& d);
+        void problemChosen(const QString& id);   // <-- SOLO id
 
 private slots:
     void onItemClick(QListWidgetItem* it);
-
-private:
-    QVector<cc::dto::ProblemDetail> problems_;
 };
 
-#endif // GUI_CODECOACH_PROBLEMLISTWIDGET_H
+#endif
+

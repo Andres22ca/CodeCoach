@@ -162,11 +162,8 @@ void MainWindow::bindViewModels() {
     // 3) Detalle listo → render en Enunciado y crear starter en Editor
     connect(problemVM_, &ProblemViewModel::detailReady,
             this, [this](const cc::dto::ProblemDetail& d){
-                // guardar id actual para RUN
                 currentProblemId_ = d.id;
-                // pintar enunciado
                 problemDetail_->render(d);
-                // pedir código starter al EditorVM
                 editorVM_->loadStarterFor(d.id);
             });
 
@@ -179,8 +176,9 @@ void MainWindow::bindViewModels() {
         switchToResultsTab();
         if (runResults_) runResults_->showRunning();
 
-        const QString pid  = currentProblemId_.isEmpty() ? QStringLiteral("two-sum")
-                                                         : currentProblemId_;
+        const QString pid  = currentProblemId_.isEmpty()
+                             ? QStringLiteral("two-sum")
+                             : currentProblemId_;
         const QString code = codeEditor_ ? codeEditor_->currentCode() : QString();
 
         runVM_->run(pid, code);
@@ -201,9 +199,11 @@ void MainWindow::bindViewModels() {
 
     // 8) Cancelar (stub visible en resultados)
     connect(actCancel_, &QAction::triggered, this, [this]{
+        runVM_->cancel();
         if (runResults_) runResults_->appendStdOut("Ejecución cancelada por el usuario.");
     });
 }
+
 
 // --- Datos iniciales ---
 void MainWindow::loadInitialData() {

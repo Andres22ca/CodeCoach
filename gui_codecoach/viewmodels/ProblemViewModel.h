@@ -21,7 +21,7 @@ namespace cc::vm {
 
         signals:
             void problemsReady(QVector<cc::dto::ProblemSummary> list);
-        void detailReady(cc::dto::ProblemDetail detail);
+            void detailReady(cc::dto::ProblemDetail detail);
 
     private:
         QVector<cc::dto::ProblemSummary> list_;

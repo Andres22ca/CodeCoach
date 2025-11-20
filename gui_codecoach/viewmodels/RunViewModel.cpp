@@ -6,7 +6,10 @@ using cc::dto::RunResults;
 
 RunViewModel::RunViewModel(QObject* parent): QObject(parent) {}
 
-void RunViewModel::run(const QString& /*problemId*/, const QString& /*code*/) {
+void RunViewModel::run(const QString& problemId, const QString& code) {
+    Q_UNUSED(problemId)
+    Q_UNUSED(code)
+
     emit stdOut("[runner] Compilando…");
     QTimer::singleShot(400, this, [this]{
         RunResults r;
