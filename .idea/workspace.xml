@@ -29,15 +29,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="56ddaeda-4987-42ce-86f2-af0fe261cdb6" name="Changes" comment="se eliminaron errores del mainwindow(aun quedan errores)">
-      <change beforePath="$PROJECT_DIR$/gui_codecoach/components/ProblemListWidget.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/gui_codecoach/components/ProblemListWidget.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gui_codecoach/components/ProblemListWidget.h" beforeDir="false" afterPath="$PROJECT_DIR$/gui_codecoach/components/ProblemListWidget.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gui_codecoach/mainwindow/MainWindow.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/gui_codecoach/mainwindow/MainWindow.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gui_codecoach/viewmodels/EditorViewModel.h" beforeDir="false" afterPath="$PROJECT_DIR$/gui_codecoach/viewmodels/EditorViewModel.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gui_codecoach/viewmodels/ProblemViewModel.h" beforeDir="false" afterPath="$PROJECT_DIR$/gui_codecoach/viewmodels/ProblemViewModel.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gui_codecoach/viewmodels/RunViewModel.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/gui_codecoach/viewmodels/RunViewModel.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gui_codecoach/viewmodels/RunViewModel.h" beforeDir="false" afterPath="$PROJECT_DIR$/gui_codecoach/viewmodels/RunViewModel.h" afterDir="false" />
-    </list>
+    <list default="true" id="56ddaeda-4987-42ce-86f2-af0fe261cdb6" name="Changes" comment="se eliminaron errores del mainwindow" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -135,7 +127,7 @@
       <workItem from="1763620830268" duration="248000" />
       <workItem from="1763621106279" duration="3867000" />
       <workItem from="1763674291539" duration="1642000" />
-      <workItem from="1763676759332" duration="1404000" />
+      <workItem from="1763676759332" duration="1710000" />
     </task>
     <task id="LOCAL-00001" summary="...">
       <option name="closed" value="true" />
@@ -153,7 +145,23 @@
       <option name="project" value="LOCAL" />
       <updated>1763624425244</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="se eliminaron errores del mainwindow">
+      <option name="closed" value="true" />
+      <created>1763679882053</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1763679882053</updated>
+    </task>
+    <task id="LOCAL-00004" summary="se eliminaron errores del mainwindow">
+      <option name="closed" value="true" />
+      <created>1763679908720</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1763679908720</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -167,6 +175,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="..." />
     <MESSAGE value="se eliminaron errores del mainwindow(aun quedan errores)" />
-    <option name="LAST_COMMIT_MESSAGE" value="se eliminaron errores del mainwindow(aun quedan errores)" />
+    <MESSAGE value="se eliminaron errores del mainwindow" />
+    <option name="LAST_COMMIT_MESSAGE" value="se eliminaron errores del mainwindow" />
   </component>
 </project>
