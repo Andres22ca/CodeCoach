@@ -30,7 +30,7 @@ struct CoachFeedback {
     std::vector<CoachHint> hints; // máx. 3
     std::string nextStep;
     std::string commonMistake;
-    ComplexityEstimate complexity;
+    complexityEstimate complexity;
     AlgorithmGuess algorithm;
 };
 
