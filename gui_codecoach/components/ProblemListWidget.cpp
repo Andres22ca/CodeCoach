@@ -1,19 +1,39 @@
-
 #include "ProblemListWidget.h"
-using cc::dto::ProblemSummary;
+#include <QListWidgetItem>
 
-ProblemListWidget::ProblemListWidget(QWidget* parent) : QListWidget(parent) {
-    connect(this, &QListWidget::itemClicked, this, &ProblemListWidget::onItemClick);
+#include "../viewmodels/dto/ProblemSummary.h"
+#include "../viewmodels/dto/ProblemDetail.h"
+
+// ajusta la ruta a donde estén realmente
+
+using cc::dto::ProblemSummary;
+using cc::dto::ProblemDetail;
+
+ProblemListWidget::ProblemListWidget(QWidget* parent)
+    : QListWidget(parent)
+{
+    connect(this, &QListWidget::itemClicked,
+            this, &ProblemListWidget::onItemClick);
 }
 
 void ProblemListWidget::setProblems(const QVector<ProblemSummary>& list) {
     clear();
+    problems_.clear();
+    problems_.reserve(list.size());
+
     for (const auto& p : list) {
-        auto* it = new QListWidgetItem(QString("[%1] %2").arg(p.difficulty, p.title), this);
-        it->setData(Qt::UserRole, p.id);
+        auto* item = new QListWidgetItem(p.title, this); // asumo title
+        item->setData(Qt::UserRole, p.id);               // asumo id
+        addItem(item);
     }
 }
 
 void ProblemListWidget::onItemClick(QListWidgetItem* it) {
-    emit problemChosen(it->data(Qt::UserRole).toString());
+    const QString id = it->data(Qt::UserRole).toString();
+
+    ProblemDetail d;
+    d.id    = id;
+    d.title = it->text();
+
+    emit problemChosen(d);
 }
