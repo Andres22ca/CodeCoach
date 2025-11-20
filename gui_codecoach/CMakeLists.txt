@@ -10,6 +10,8 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 find_package(Qt6 6.4.2 REQUIRED COMPONENTS Widgets Network)
 
+
+
 add_executable(gui_codecoach
         main.cpp
 

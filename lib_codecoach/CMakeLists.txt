@@ -62,3 +62,4 @@ add_executable(codecoach_smoke
 target_link_libraries(codecoach_smoke
         PRIVATE lib_codecoach
 )
+add_subdirectory(gui_codecoach)
