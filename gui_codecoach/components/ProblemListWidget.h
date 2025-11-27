@@ -1,30 +1,24 @@
-#pragma once
 #ifndef GUI_CODECOACH_PROBLEMLISTWIDGET_H
 #define GUI_CODECOACH_PROBLEMLISTWIDGET_H
 
 #include <QListWidget>
-#include <QString>
+#include "../viewmodels/dto/ProblemSummary.h"
 
-class QListWidgetItem;
-
-namespace cc::dto {
-    struct ProblemSummary;
-}
-
-class ProblemListWidget : public QListWidget {
+class ProblemListWidget : public QListWidget
+{
     Q_OBJECT
 public:
     explicit ProblemListWidget(QWidget* parent = nullptr);
 
 public slots:
-    void setProblems(const QVector<cc::dto::ProblemSummary>& list);
+    void setProblems(const QList<cc::dto::ProblemSummary>& problems);
 
     signals:
-        void problemChosen(const QString& id);   // <-- SOLO id
+        void problemChosen(const QString& problemId);
 
 private slots:
-    void onItemClick(QListWidgetItem* it);
+    void handleItemClicked(QListWidgetItem* item);
 };
 
-#endif
+#endif // GUI_CODECOACH_PROBLEMLISTWIDGET_H
 

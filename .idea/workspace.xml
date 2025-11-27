@@ -29,7 +29,14 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="56ddaeda-4987-42ce-86f2-af0fe261cdb6" name="Changes" comment="se eliminaron errores del mainwindow" />
+    <list default="true" id="56ddaeda-4987-42ce-86f2-af0fe261cdb6" name="Changes" comment="se eliminaron errores del mainwindow">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui_codecoach/components/ProblemListWidget.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/gui_codecoach/components/ProblemListWidget.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui_codecoach/components/ProblemListWidget.h" beforeDir="false" afterPath="$PROJECT_DIR$/gui_codecoach/components/ProblemListWidget.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui_codecoach/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/gui_codecoach/main.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui_codecoach/mainwindow/MainWindow.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/gui_codecoach/mainwindow/MainWindow.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gui_codecoach/viewmodels/dto/ProblemSummary.h" beforeDir="false" afterPath="$PROJECT_DIR$/gui_codecoach/viewmodels/dto/ProblemSummary.h" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -96,11 +103,6 @@
   }
 }</component>
   <component name="RunManager" selected="CMake Application.gui_codecoach">
-    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="codecoach_smoke" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="CodeCoach" TARGET_NAME="codecoach_smoke" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="CodeCoach" RUN_TARGET_NAME="codecoach_smoke">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -133,6 +135,7 @@
       <workItem from="1763621106279" duration="3867000" />
       <workItem from="1763674291539" duration="1642000" />
       <workItem from="1763676759332" duration="1745000" />
+      <workItem from="1764216479094" duration="2198000" />
     </task>
     <task id="LOCAL-00001" summary="...">
       <option name="closed" value="true" />

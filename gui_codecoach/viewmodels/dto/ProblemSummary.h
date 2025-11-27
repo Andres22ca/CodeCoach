@@ -1,20 +1,26 @@
-
-
-#ifndef CODECOACH_PROBLEMSUMMARY_H
-#define CODECOACH_PROBLEMSUMMARY_H
+#ifndef CC_DTO_PROBLEMSUMMARY_H
+#define CC_DTO_PROBLEMSUMMARY_H
 
 #include <QString>
 #include <QStringList>
+#include <QMetaType>
+#include <QList>
 
 namespace cc::dto {
 
     struct ProblemSummary {
-        QString id;          // Identificador único del problema
-        QString title;       // Nombre o título
-        QString difficulty;  // "Easy", "Medium", "Hard"
-        QStringList tags;    // Etiquetas de categorías (math, dp, strings...)
+        QString id;
+        QString title;
+        QString difficulty;
+        QStringList tags;
     };
 
 } // namespace cc::dto
 
-#endif // CODECOACH_PROBLEMSUMMARY_H
+// Metatipos para Qt
+Q_DECLARE_METATYPE(cc::dto::ProblemSummary)
+Q_DECLARE_METATYPE(QList<cc::dto::ProblemSummary>)
+
+#endif // CC_DTO_PROBLEMSUMMARY_H
+
+

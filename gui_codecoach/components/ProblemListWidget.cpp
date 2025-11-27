@@ -1,27 +1,23 @@
 #include "ProblemListWidget.h"
-#include <QListWidgetItem>
-
-#include "../viewmodels/dto/ProblemSummary.h"
-using cc::dto::ProblemSummary;
 
 ProblemListWidget::ProblemListWidget(QWidget* parent)
     : QListWidget(parent)
 {
     connect(this, &QListWidget::itemClicked,
-            this, &ProblemListWidget::onItemClick);
+            this, &ProblemListWidget::handleItemClicked);
 }
 
-void ProblemListWidget::setProblems(const QVector<ProblemSummary>& list) {
+void ProblemListWidget::setProblems(const QList<cc::dto::ProblemSummary>& problems)
+{
     clear();
-
-    for (const auto& p : list) {
-        auto* item = new QListWidgetItem(p.title, this);
-        item->setData(Qt::UserRole, p.id);
-        addItem(item);
+    for (const auto& p : problems) {
+        auto* it = new QListWidgetItem(p.title, this);
+        it->setData(Qt::UserRole, p.id);
     }
 }
 
-void ProblemListWidget::onItemClick(QListWidgetItem* it) {
-    const QString id = it->data(Qt::UserRole).toString();
-    emit problemChosen(id);     // <-- SOLO id
+void ProblemListWidget::handleItemClicked(QListWidgetItem* item)
+{
+    const QString id = item->data(Qt::UserRole).toString();
+    emit problemChosen(id);
 }

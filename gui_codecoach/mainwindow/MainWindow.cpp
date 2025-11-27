@@ -1,5 +1,3 @@
-// Created by andres on 4/11/25.
-//
 
 #include "MainWindow.h"
 
@@ -32,6 +30,7 @@
 #include "../viewmodels/dto/ProblemDetail.h"
 #include "../viewmodels/dto/RunResults.h"
 #include "../viewmodels/dto/CoachFeedback.h"
+#include <QList>
 
 using cc::vm::ProblemViewModel;
 using cc::vm::EditorViewModel;
@@ -48,6 +47,10 @@ MainWindow::MainWindow(QWidget* parent)
     bindViewModels();
     loadInitialData();
 }
+
+
+
+
 
 // --- Layout ---
 void MainWindow::setupLayout() {
