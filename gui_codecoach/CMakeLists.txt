@@ -44,9 +44,15 @@ add_executable(gui_codecoach
         viewmodels/dto/CoachFeedback.h
 )
 
+# Para que la GUI pueda incluir headers de lib_codecoach
+target_include_directories(gui_codecoach
+        PRIVATE
+        ${CMAKE_SOURCE_DIR}/lib_codecoach
+)
+
 target_link_libraries(gui_codecoach
         PRIVATE
         Qt6::Widgets
         Qt6::Network
+        lib_codecoach      # <--- AQUÍ enlazamos la librería
 )
-
