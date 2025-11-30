@@ -166,10 +166,10 @@ HttpResponse HttpClient::request(const std::string& method,
 // ---------------------
 HttpResponse HttpClient::do_request_once(const HttpRequest& req) {
 #ifndef CC_USE_CURL
+    // Modo “sin libcurl”: devolvemos un error explícito de red.
     HttpResponse out;
     out.statusCode = 0;
-    out.body = "ERROR: CC_USE_CURL no está definido y no hay stub. "
-               "Debe compilar con libcurl o definir CC_USE_CURL.";
+    out.body = "HttpClient: CC_USE_CURL no está definido o libcurl no está disponible.";
     return out;
 #else
     HttpResponse out;
