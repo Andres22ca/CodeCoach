@@ -2,15 +2,6 @@
 // Created by andres on 5/10/25.
 //
 
-// http_client.cpp — Implementación con soporte de retries/backoff y logging.
-// Define CC_USE_CURL para habilitar libcurl; si no, se usa un stub útil para defensa.
-
-// http_client.cpp — Implementación con soporte de retries/backoff y logging.
-// Define CC_USE_CURL para habilitar libcurl; si no, se usa un stub útil para defensa.
-
-// http_client.cpp — Implementación con soporte de retries/backoff y logging.
-// Define CC_USE_CURL para habilitar libcurl; si no, se usa un stub útil para defensa.
-
 #include "http_client.h"
 
 #include "logging/logger.h"
@@ -22,6 +13,7 @@
 #include <algorithm>
 #include <unordered_map>
 #include <cctype>
+#include <string_view>
 
 #ifdef CC_USE_CURL
   #include <curl/curl.h>
@@ -43,6 +35,31 @@ static std::string method_upper(std::string m) {
                    [](unsigned char c){ return static_cast<char>(std::toupper(c)); });
     return m;
 }
+
+#ifdef CC_USE_CURL
+// --- Callbacks para libcurl --- //
+static size_t write_callback(char* ptr, size_t size, size_t nmemb, void* userdata) {
+    auto* s = static_cast<std::string*>(userdata);
+    s->append(ptr, size * nmemb);
+    return size * nmemb;
+}
+
+static size_t header_callback(char* buffer, size_t size, size_t nitems, void* userdata) {
+    size_t total = size * nitems;
+    auto* map = static_cast<std::unordered_map<std::string, std::string>*>(userdata);
+    std::string line(buffer, total);
+    auto pos = line.find(':');
+    if (pos != std::string::npos) {
+        std::string k = line.substr(0, pos);
+        std::string v = line.substr(pos + 1);
+        while (!v.empty() && (v.front()==' ' || v.front()=='\t')) v.erase(v.begin());
+        while (!v.empty() && (v.back()=='\r' || v.back()=='\n')) v.pop_back();
+        while (!k.empty() && (k.back()=='\r' || k.back()=='\n')) k.pop_back();
+        if (!k.empty()) (*map)[k] = v;
+    }
+    return total;
+}
+#endif // CC_USE_CURL
 
 static bool is_retryable_status(int code) {
     // 5xx + 429 + 0 (error de red/timeout)
@@ -84,7 +101,9 @@ HttpResponse HttpClient::del(const std::string& url)  { return request("DELETE",
 HttpResponse HttpClient::post(const std::string& url, const std::string& body) { return request("POST", url, body); }
 HttpResponse HttpClient::put(const std::string& url, const std::string& body)  { return request("PUT", url, body); }
 
-// Con retries + backoff
+// ---------------------
+// request() con retries
+// ---------------------
 HttpResponse HttpClient::request(const std::string& method,
                                  const std::string& url,
                                  const std::string& body,
@@ -146,8 +165,13 @@ HttpResponse HttpClient::request(const std::string& method,
 // do_request_once()
 // ---------------------
 HttpResponse HttpClient::do_request_once(const HttpRequest& req) {
-#ifdef CC_USE_CURL
-    // ---- Implementación real con libcurl ----
+#ifndef CC_USE_CURL
+    HttpResponse out;
+    out.statusCode = 0;
+    out.body = "ERROR: CC_USE_CURL no está definido y no hay stub. "
+               "Debe compilar con libcurl o definir CC_USE_CURL.";
+    return out;
+#else
     HttpResponse out;
 
     CURL* curl = curl_easy_init();
@@ -157,65 +181,56 @@ HttpResponse HttpClient::do_request_once(const HttpRequest& req) {
         return out;
     }
 
+    // URL
     curl_easy_setopt(curl, CURLOPT_URL, req.url.c_str());
 
+    // Método HTTP
     if (req.method == "GET") {
         curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
     } else if (req.method == "POST") {
         curl_easy_setopt(curl, CURLOPT_POST, 1L);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, req.body.c_str());
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, static_cast<long>(req.body.size()));
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE,
+                         static_cast<long>(req.body.size()));
     } else if (req.method == "PUT") {
         curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, req.body.c_str());
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, static_cast<long>(req.body.size()));
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE,
+                         static_cast<long>(req.body.size()));
     } else if (req.method == "DELETE") {
         curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
     } else {
         curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, req.method.c_str());
     }
 
+    // Timeout
 #if defined(CURLOPT_TIMEOUT_MS)
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, req.timeoutMs);
 #else
     curl_easy_setopt(curl, CURLOPT_TIMEOUT, (req.timeoutMs + 999) / 1000);
 #endif
 
+    // Headers de request
     struct curl_slist* hdrs = nullptr;
     for (const auto& kv : req.headers) {
         std::string line = kv.first + ": " + kv.second;
         hdrs = curl_slist_append(hdrs, line.c_str());
     }
-    if (hdrs) curl_easy_setopt(curl, CURLOPT_HTTPHEADER, hdrs);
+    if (hdrs) {
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, hdrs);
+    }
 
+    // Callbacks de respuesta
     std::string response_body;
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
-        +[](char* ptr, size_t size, size_t nmemb, void* userdata) -> size_t {
-            auto* s = static_cast<std::string*>(userdata);
-            s->append(ptr, size * nmemb);
-            return size * nmemb;
-        });
+    std::unordered_map<std::string, std::string> resp_headers;
+
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &write_callback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_body);
 
-    std::unordered_map<std::string, std::string> resp_headers;
-    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION,
-        +[](char* buffer, size_t size, size_t nitems, void* userdata) -> size_t {
-            size_t total = size * nitems;
-            auto* map = static_cast<std::unordered_map<std::string, std::string>*>(userdata);
-            std::string line(buffer, total);
-            auto pos = line.find(':');
-            if (pos != std::string::npos) {
-                std::string k = line.substr(0, pos);
-                std::string v = line.substr(pos + 1);
-                while (!v.empty() && (v.front()==' ' || v.front()=='\t')) v.erase(v.begin());
-                while (!v.empty() && (v.back()=='\r' || v.back()=='\n')) v.pop_back();
-                while (!k.empty() && (k.back()=='\r' || k.back()=='\n')) k.pop_back();
-                if (!k.empty()) (*map)[k] = v;
-            }
-            return total;
-        });
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, &header_callback);
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, &resp_headers);
 
+    // Ejecutar
     CURLcode rc = curl_easy_perform(curl);
     long http_code = 0;
     if (rc == CURLE_OK) {
@@ -231,97 +246,7 @@ HttpResponse HttpClient::do_request_once(const HttpRequest& req) {
     if (hdrs) curl_slist_free_all(hdrs);
     curl_easy_cleanup(curl);
     return out;
-
-#else
-    // ---- Modo STUB (sin libcurl / sin red) ----
-    HttpResponse out;
-    const std::string& U = req.url;
-
-    // Problems API
-    if (U.find("/problems") != std::string::npos) {
-        if (req.method == "GET") {
-            if (U.find("/problems/") != std::string::npos) {
-                out.statusCode = 200;
-                out.body =
-                    "{"
-                      "\"id\":\"two-sum\","
-                      "\"title\":\"Two Sum\","
-                      "\"difficulty\":\"Easy\","
-                      "\"tags\":[\"array\",\"hashmap\"],"
-                      "\"statement\":\"Given an array of integers...\","
-                      "\"samples\":[{\"input\":\"4\\n2 7 11 15\\n9\",\"output\":\"0 1\"}]"
-                    "}";
-                return out;
-            } else {
-                out.statusCode = 200;
-                out.body =
-                    "{"
-                      "\"problems\":["
-                        "{\"id\":\"two-sum\",\"title\":\"Two Sum\",\"difficulty\":\"Easy\",\"tags\":[\"array\",\"hashmap\"]},"
-                        "{\"id\":\"longest-substring\",\"title\":\"Longest Substring\",\"difficulty\":\"Medium\",\"tags\":[\"string\",\"sliding-window\"]}"
-                      "]"
-                    "}";
-                return out;
-            }
-        }
-        if (req.method == "POST") {
-            out.statusCode = 201;
-            out.body = "{\"id\":\"new-problem-id\"}";
-            return out;
-        }
-        if (req.method == "PUT") {
-            out.statusCode = 200;
-            out.body = "{\"ok\":true}";
-            return out;
-        }
-        if (req.method == "DELETE") {
-            out.statusCode = 204;
-            out.body.clear();
-            return out;
-        }
-    }
-
-    // Eval API
-    if (U.find("/evaluate") != std::string::npos && req.method == "POST") {
-        out.statusCode = 200;
-        out.body =
-            "{"
-              "\"passed\":false,"
-              "\"timeMs\":42,"
-              "\"memoryKB\":2560,"
-              "\"stdout\":\"OK\","
-              "\"stderr\":\"\","
-              "\"exitCode\":0,"
-              "\"cases\":["
-                "{\"input\":\"2 7 11 15\\n9\",\"output\":\"0 1\",\"expected\":\"0 1\",\"passed\":true,\"timeMs\":12,\"memoryKB\":2048},"
-                "{\"input\":\"1 2 3\\n7\",\"output\":\"-1\",\"expected\":\"0 2\",\"passed\":false,\"timeMs\":30,\"memoryKB\":1024}"
-              "]"
-            "}";
-        return out;
-    }
-
-    // Analyzer API
-    if (U.find("/analyze") != std::string::npos && req.method == "POST") {
-        out.statusCode = 200;
-        out.body =
-            "{"
-              "\"hints\":["
-                "{\"title\":\"Usa un mapa\",\"body\":\"Puedes reducir a O(n)\",\"level\":1},"
-                "{\"title\":\"indices correctos\",\"body\":\"Cuida el retorno\",\"level\":1}"
-              "],"
-              "\"nextStep\":\"Implementa hash map y reintenta\","
-              "\"commonMistake\":\"Confundir valor con índice\","
-              "\"complexity\":{\"time\":\"O(n)\",\"space\":\"O(n)\"},"
-              "\"algorithm\":{\"name\":\"Hash map\",\"confidence\":85}"
-            "}";
-        return out;
-    }
-
-    // Default 404
-    out.statusCode = 404;
-    out.body = "{\"error\":\"stub: route not found\"}";
-    return out;
-#endif
+#endif // CC_USE_CURL
 }
 
 } // namespace cc::http

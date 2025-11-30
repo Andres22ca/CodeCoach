@@ -1,13 +1,18 @@
-//
 // Created by andres on 5/10/25.
 //
 
 #include "eval_client.h"
 #include "logging/logger.h"
 
-#include <exception>  // para std::exception
+#include <exception>
+#include <nlohmann/json.hpp>
 
 namespace cc::sdk {
+
+using nlohmann::json;
+using cc::contracts::RunRequest;
+using cc::contracts::RunResult;
+using cc::contracts::RunCaseResult;
 
 EvalClient::EvalClient(const std::string& baseUrl)
     : baseUrl_(baseUrl)
@@ -16,79 +21,84 @@ EvalClient::EvalClient(const std::string& baseUrl)
     httpClient_.setDefaultHeader("Content-Type", "application/json");
 }
 
-contracts::RunResult EvalClient::submit(const contracts::RunRequest& request) {
-    std::string url = baseUrl_ + "/evaluate";
+static json to_json(const RunRequest& req) {
+    json j;
+    j["code"]      = req.code;
+    j["problemId"] = req.problemId;
+    j["stdin"]     = req.stdin;
+    return j;
+}
+
+static RunResult runresult_from_json(const json& j) {
+    RunResult result;
+
+    result.passed   = j.value("passed", false);
+    result.timeMs   = j.value("timeMs", 0);
+    result.memoryKB = j.value("memoryKB", 0);
+    result.exitCode = j.value("exitCode", 0);
+    result.stdout   = j.value("stdout", std::string{});
+    result.stderr   = j.value("stderr", std::string{});
+
+    if (j.contains("cases") && j["cases"].is_array()) {
+        for (const auto& cj : j["cases"]) {
+            RunCaseResult c;
+            c.input    = cj.value("input",    std::string{});
+            c.output   = cj.value("output",   std::string{});
+            c.expected = cj.value("expected", std::string{});
+            c.passed   = cj.value("passed",   false);
+            c.timeMs   = cj.value("timeMs",   0);
+            c.memoryKB = cj.value("memoryKB", 0);
+            result.cases.push_back(std::move(c));
+        }
+    }
+
+    return result;
+}
+
+RunResult EvalClient::submit(const RunRequest& request) {
+    const std::string url = baseUrl_ + "/evaluate";
 
     logging::Logger::info("Submitting code for evaluation");
 
-    // Mientras sea stub, evitamos warning de parámetro sin usar
-    (void)request;
-
-    contracts::RunResult result;
-    result.passed   = false;
-    result.timeMs   = 0;
-    result.memoryKB = 0;
-    result.exitCode = -1;
+    RunResult fallback;
+    fallback.passed   = false;
+    fallback.timeMs   = 0;
+    fallback.memoryKB = 0;
+    fallback.exitCode = -1;
 
     try {
-        // NOTA: En producción, serializar request a JSON con nlohmann/json
-        /*
-        json requestBody;
-        requestBody["code"]      = request.code;
-        requestBody["problemId"] = request.problemId;
-        requestBody["stdin"]     = request.stdin;
-        std::string jsonBody     = requestBody.dump();
-        */
-
-        std::string jsonBody = "{}"; // Stub
+        json requestBody = to_json(request);
+        std::string jsonBody = requestBody.dump();
 
         auto response = httpClient_.post(url, jsonBody);
 
         if (!response.isSuccess()) {
             logging::Logger::error(
-                "Evaluation failed: " + std::to_string(response.statusCode)
+                "Evaluation failed: HTTP " + std::to_string(response.statusCode)
             );
-            result.stderr = "Evaluation service error: " + std::to_string(response.statusCode);
-            return result;
+            fallback.stderr =
+                "Evaluation service error: HTTP " + std::to_string(response.statusCode);
+            return fallback;
         }
 
-        // NOTA: En producción, parsear response.body como JSON
-        /*
-        auto responseJson   = json::parse(response.body);
-        result.passed       = responseJson["passed"];
-        result.timeMs       = responseJson["timeMs"];
-        result.memoryKB     = responseJson["memoryKB"];
-        result.exitCode     = responseJson["exitCode"];
-        result.stdout       = responseJson["stdout"];
-        result.stderr       = responseJson["stderr"];
+        auto responseJson = json::parse(response.body);
+        auto result       = runresult_from_json(responseJson);
 
-        for (const auto& caseJson : responseJson["cases"]) {
-            contracts::RunCaseResult caseResult;
-            caseResult.input    = caseJson["input"];
-            caseResult.output   = caseJson["output"];
-            caseResult.expected = caseJson["expected"];
-            caseResult.passed   = caseJson["passed"];
-            caseResult.timeMs   = caseJson["timeMs"];
-            caseResult.memoryKB = caseJson["memoryKB"];
-            result.cases.push_back(caseResult);
-        }
-        */
-
-        logging::Logger::info("Code evaluated successfully (stub)");
+        logging::Logger::info("Code evaluated successfully");
         return result;
 
     } catch (const std::exception& e) {
         logging::Logger::error(
             "Exception in EvalClient::submit: " + std::string(e.what())
         );
-        result.stderr = "Exception: " + std::string(e.what());
-        return result;
+        fallback.stderr = "Exception: " + std::string(e.what());
+        return fallback;
     }
 }
 
-std::optional<contracts::RunResult>
+std::optional<RunResult>
 EvalClient::getResult(const std::string& submissionId) {
-    std::string url = baseUrl_ + "/results/" + submissionId;
+    const std::string url = baseUrl_ + "/results/" + submissionId;
 
     logging::Logger::debug("Fetching evaluation result: " + submissionId);
 
@@ -96,21 +106,16 @@ EvalClient::getResult(const std::string& submissionId) {
         auto response = httpClient_.get(url);
 
         if (!response.isSuccess()) {
-            // 🔧 aquí estaba el error: warning → warn
-            logging::Logger::warn("Result not found: " + submissionId);
+            logging::Logger::warn("Result not found or error: HTTP "
+                                  + std::to_string(response.statusCode));
             return std::nullopt;
         }
 
-        // NOTA: En producción, parsear JSON y retornar RunResult
-        /*
-        auto responseJson = json::parse(response.body);
-        contracts::RunResult result;
-        // ... llenar campos desde responseJson
-        return result;
-        */
+        auto j = json::parse(response.body);
+        RunResult result = runresult_from_json(j);
 
-        logging::Logger::info("Result fetched (stub): " + submissionId);
-        return std::nullopt; // Stub
+        logging::Logger::info("Result fetched successfully");
+        return result;
 
     } catch (const std::exception& e) {
         logging::Logger::error(

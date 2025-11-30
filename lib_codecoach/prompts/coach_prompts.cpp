@@ -58,14 +58,14 @@ std::string truncate_middle(std::string_view s, std::size_t max) {
         return std::string{s};
     }
 
-    const std::size_t keep  = max - 1; // dejamos espacio para '…'
+    const std::size_t keep  = max - 1;
     const std::size_t front = keep / 2;
     const std::size_t back  = keep - front;
 
     std::string out;
     out.reserve(max);
     out.append(s.substr(0, front));
-    out.push_back('…');
+    out.push_back('...');
     out.append(s.substr(s.size() - back));
     return out;
 }

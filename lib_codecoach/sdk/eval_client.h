@@ -1,7 +1,3 @@
-//
-// Created by andres on 5/10/25.
-//
-
 #ifndef LIB_CODECOACH_EVAL_CLIENT_H
 #define LIB_CODECOACH_EVAL_CLIENT_H
 
@@ -21,11 +17,11 @@ namespace cc::sdk {
     public:
         explicit EvalClient(const std::string& baseUrl);
 
-        // Enviar código para evaluación
-        contracts::RunResult submit(const contracts::RunRequest& request);
+        // Enviar código para resultado
+        cc::contracts::RunResult submit(const cc::contracts::RunRequest& request);
 
-        // Obtener resultado de una evaluación (si es asíncrona)
-        std::optional<contracts::RunResult> getResult(const std::string& submissionId);
+        // Obtener resultado
+        std::optional<cc::contracts::RunResult> getResult(const std::string& submissionId);
     };
 
 } // namespace cc::sdk

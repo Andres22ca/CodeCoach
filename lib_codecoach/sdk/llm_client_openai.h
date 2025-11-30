@@ -25,7 +25,8 @@ namespace cc::sdk {
         std::string complete(const std::string& prompt,
                             const std::string& systemPrompt = "") override;
 
-        bool isAvailable() override;
+        bool isAvailable() const override;
+
     };
 
 } // namespace cc::sdk

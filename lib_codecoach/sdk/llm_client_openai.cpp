@@ -72,7 +72,7 @@ std::string OpenAIClient::complete(const std::string& prompt,
     }
 }
 
-bool OpenAIClient::isAvailable() {
+bool OpenAIClient::isAvailable() const{
     return !apiKey_.empty();
 }
 

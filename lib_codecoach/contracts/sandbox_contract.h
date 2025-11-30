@@ -1,40 +1,37 @@
-//
 // Created by andres on 5/10/25.
 //
 
 #ifndef LIB_CODECOACH_SANDBOX_CONTRACT_H
 #define LIB_CODECOACH_SANDBOX_CONTRACT_H
+
 #include <string>
 #include <vector>
 
-
 namespace cc::sandbox {
+
     struct SandboxLimits {
-        int timeLimitMs; //tiempo maximo para la cpu a la hora de cargar la respuesta
-        int memoryLimitKB; //pico permitido en KB
-
-
+        int timeLimitMs{0};   // tiempo máximo para la CPU
+        int memoryLimitKB{0}; // pico permitido en KB
     };
-    struct SandboxFiles {
-        std::string workdir; //directorio de trabajo
-        std::string sourceFilename; //el ejecutable
-        std::string executablePath; //Donde queda el compilado
 
+    struct SandboxFiles {
+        std::string workdir;        // directorio de trabajo
+        std::string sourceFilename; // nombre del archivo fuente
+        std::string executablePath; // ruta del ejecutable compilado
     };
 
     struct SandboxToolchain {
-        std::string language;
-        std::vector<std::string> compileCmd;
-        std::vector<std::string> runCmd;
-
+        std::string              language;    // ej. "cpp20", "python3"
+        std::vector<std::string> compileCmd;  // comando para compilar
+        std::vector<std::string> runCmd;      // comando para ejecutar
     };
-    struct SandboxRequest {
-        std::string code; //fuente o ruta del codigo
-        std::string stdin; //entrada global
-        SandboxLimits limits;
-        SandboxFiles files;
-        SandboxToolchain toolchain;
 
+    struct SandboxRequest {
+        std::string   code;       // código fuente o ruta
+        std::string   stdin;      // entrada global
+        SandboxLimits limits;
+        SandboxFiles  files;
+        SandboxToolchain toolchain;
     };
 
     enum class SandboxStatus {
@@ -48,20 +45,18 @@ namespace cc::sandbox {
     };
 
     struct SandboxMetrics {
-        int timeMs; //cpu
-        int memoryKB;//pico maximo observado
+        int timeMs{0};    // tiempo de CPU usado
+        int memoryKB{0};  // pico máximo observado
     };
 
     struct SandboxResult {
-        SandboxStatus status;
-        int exitCode; // 0 si ok, si no se pone un cod cualquiera
-        std::string stdout;
-        std::string stderr;
+        SandboxStatus status{SandboxStatus::INTERNAL_ERROR};
+        int           exitCode{0};  // 0 si OK, otro valor si fallo
+        std::string   stdout;
+        std::string   stderr;
         SandboxMetrics metrics;
-
     };
-}
 
-#endif //LIB_CODECOACH_SANDBOX_CONTRACT_H
+} // namespace cc::sandbox
 
-// definir estructura para moror de evaluacion
+#endif // LIB_CODECOACH_SANDBOX_CONTRACT_H

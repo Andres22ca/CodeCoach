@@ -1,49 +1,38 @@
-//
 // Created by andres on 5/10/25.
 //
 
 #ifndef LIB_CODECOACH_ANALYZER_DTO_H
 #define LIB_CODECOACH_ANALYZER_DTO_H
+
 #include <string>
 #include <vector>
 
-struct AlgorithmGuess {
-    std::string name;
-    int confidence; // va de 0-100 y sirve para ver la seguridad del analizador
+namespace cc::contracts {
 
-};
+    struct AlgorithmGuess {
+        std::string name;
+        int confidence{0}; // 0–100
+    };
 
-struct complexityEstimate { //para aplicar las formulas de medicion
-    std::string time; //o(n log n)
-    std::string space;//o(n)
+    struct ComplexityEstimate {
+        std::string time;   // e.g. "O(n log n)"
+        std::string space;  // e.g. "O(n)"
+    };
 
+    struct CoachHint {
+        std::string title;
+        std::string body;
+        int level{0};      // 1 = básico, 2 = intermedio, etc.
+    };
 
-};
-struct CoachHint {
-    std::string tile;
-    std::string body;
-    int level;
+    struct CoachFeedback {
+        std::vector<CoachHint> hints; // máx. 3
+        std::string nextStep;
+        std::string commonMistake;
+        ComplexityEstimate complexity;
+        AlgorithmGuess     algorithm;
+    };
 
-};
+} // namespace cc::contracts
 
-struct CoachFeedback {
-    std::vector<CoachHint> hints; // máx. 3
-    std::string nextStep;
-    std::string commonMistake;
-    complexityEstimate complexity;
-    AlgorithmGuess algorithm;
-};
-
-
-
-
-
-
-
-
-
-
-
-#endif //LIB_CODECOACH_ANALYZER_DTO_H
-
-// modelos de respuesta para el coach
+#endif // LIB_CODECOACH_ANALYZER_DTO_H

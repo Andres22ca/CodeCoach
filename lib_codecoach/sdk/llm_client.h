@@ -19,7 +19,8 @@ namespace cc::sdk {
                                      const std::string& systemPrompt = "") = 0;
 
         // Verificar si el cliente está disponible (tiene API key, etc)
-        virtual bool isAvailable() = 0;
+        virtual bool isAvailable() const = 0;
+
     };
 
 } // namespace cc::sdk

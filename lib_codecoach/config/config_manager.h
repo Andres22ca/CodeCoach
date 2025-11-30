@@ -8,19 +8,29 @@
 
 namespace cc::config {
 
+    // URLs base de los microservicios REST
     struct Endpoints {
-        std::string problems;
-        std::string eval;
-        std::string analyzer;
+        std::string problemsBaseUrl;   // p.ej. "http://localhost:8081"
+        std::string evalBaseUrl;       // p.ej. "http://localhost:8082"
+        std::string analyzerBaseUrl;   // p.ej. "http://localhost:8083"
     };
 
+    // Config de MongoDB
+    struct MongoConfig {
+        std::string uri;               // p.ej. "mongodb://localhost:27017"
+        std::string dbName;            // p.ej. "codecoach"
+    };
+
+    // Política HTTP (timeouts y reintentos)
     struct HttpPolicy {
-        int timeoutMs;
-        int retries;
+        int timeoutMs{10000};
+        int retries{2};
     };
 
+    // Configuración global de CodeCoach
     struct Config {
-        Endpoints endpoints;
+        Endpoints  endpoints;
+        MongoConfig mongo;
         HttpPolicy http;
     };
 
