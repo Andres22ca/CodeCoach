@@ -119,7 +119,7 @@ std::string sanitize(std::string_view msg) {
             auto start = pos + key.size();
             auto end = s.find('\n', start);
             if (end == std::string::npos) end = s.size();
-            // reemplazar todo el valor por **** salvo los primeros 'keep' chars
+
             if (start < end) {
                 int n = static_cast<int>(end - start);
                 if (n > keep) {

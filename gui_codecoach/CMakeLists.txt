@@ -4,6 +4,7 @@ project(gui_codecoach LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Necesario para Q_OBJECT, .ui, etc.
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
@@ -38,21 +39,24 @@ add_executable(gui_codecoach
         viewmodels/RunViewModel.h
         viewmodels/CoachViewModel.cpp
         viewmodels/CoachViewModel.h
+
+        # DTOs de la GUI
         viewmodels/dto/ProblemSummary.h
         viewmodels/dto/ProblemDetail.h
         viewmodels/dto/RunResults.h
         viewmodels/dto/CoachFeedback.h
 )
 
-# Para que la GUI pueda incluir headers de lib_codecoach
+# Includes propios de la GUI (por si acaso)
 target_include_directories(gui_codecoach
         PRIVATE
-        ${CMAKE_SOURCE_DIR}/lib_codecoach
+        ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
+# Enlazar contra Qt y la librería
 target_link_libraries(gui_codecoach
         PRIVATE
         Qt6::Widgets
         Qt6::Network
-        lib_codecoach      # <--- AQUÍ enlazamos la librería
+        lib_codecoach       # <- target definido en lib_codecoach/CMakeLists.txt
 )

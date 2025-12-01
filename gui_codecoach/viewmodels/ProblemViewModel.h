@@ -9,7 +9,6 @@
 #include "dto/ProblemSummary.h"
 #include "dto/ProblemDetail.h"
 
-// 👉 SDK de la librería (REST / HTTP)
 #include "sdk/problems_client.h"
 
 namespace cc::vm {

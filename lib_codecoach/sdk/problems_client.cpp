@@ -1,19 +1,99 @@
-// sdk/problems_client.cpp
-//
-// Cliente REST para el microservicio de problemas de CodeCoach.
+// Created by andres on 5/10/25.
 //
 
-#include "sdk/problems_client.h"
+#include "problems_client.h"
 #include "logging/logger.h"
 
-#include <sstream>
-#include <stdexcept>
 #include <nlohmann/json.hpp>
+#include <sstream>
 
 namespace cc::sdk {
 
 using cc::logging::Logger;
-using json = nlohmann::json;
+using nlohmann::json;
+
+// Helpers internos para convertir entre JSON y contracts
+namespace {
+
+json to_json(const cc::contracts::ProblemDetail& p) {
+    json j;
+    j["id"]         = p.id;
+    j["title"]      = p.title;
+    j["difficulty"] = p.difficulty;
+    j["statement"]  = p.statement;
+
+    // tags: vector<string>
+    j["tags"] = json::array();
+    for (const auto& t : p.tags) {
+        j["tags"].push_back(t);
+    }
+
+    // samples: vector<Sample> { input, output }
+    j["samples"] = json::array();
+    for (const auto& s : p.samples) {
+        json js;
+        js["input"]  = s.input;
+        js["output"] = s.output;
+        j["samples"].push_back(js);
+    }
+
+    return j;
+}
+
+cc::contracts::ProblemSummary
+from_json_summary(const json& j) {
+    cc::contracts::ProblemSummary p;
+    p.id         = j.value("id", "");
+    p.title      = j.value("title", "");
+    p.difficulty = j.value("difficulty", "");
+
+    if (j.contains("tags") && j["tags"].is_array()) {
+        for (const auto& t : j["tags"]) {
+            if (t.is_string()) {
+                p.tags.push_back(t.get<std::string>());
+            }
+        }
+    }
+    return p;
+}
+
+cc::contracts::ProblemDetail
+from_json_detail(const json& j) {
+    cc::contracts::ProblemDetail p;
+
+    // Campos heredados de ProblemSummary
+    p.id         = j.value("id", "");
+    p.title      = j.value("title", "");
+    p.difficulty = j.value("difficulty", "");
+
+    if (j.contains("tags") && j["tags"].is_array()) {
+        for (const auto& t : j["tags"]) {
+            if (t.is_string()) {
+                p.tags.push_back(t.get<std::string>());
+            }
+        }
+    }
+
+    // Campos propios de ProblemDetail
+    p.statement = j.value("statement", "");
+
+    if (j.contains("samples") && j["samples"].is_array()) {
+        for (const auto& js : j["samples"]) {
+            cc::contracts::Sample s;
+            s.input  = js.value("input", "");
+            s.output = js.value("output", "");
+            p.samples.push_back(std::move(s));
+        }
+    }
+
+    return p;
+}
+
+} // namespace (helpers anónimos)
+
+// ==========================
+// Implementación pública
+// ==========================
 
 ProblemsClient::ProblemsClient(const std::string& baseUrl)
     : baseUrl_(baseUrl)
@@ -22,74 +102,13 @@ ProblemsClient::ProblemsClient(const std::string& baseUrl)
     httpClient_.setDefaultHeader("Content-Type", "application/json");
 }
 
-// ---------------------------------------------------------
-// Helpers locales para mapear JSON <-> DTOs
-// ---------------------------------------------------------
-
-static cc::contracts::ProblemSummary from_json_summary(const json& j) {
-    cc::contracts::ProblemSummary s;
-    s.id         = j.value("id", "");
-    s.title      = j.value("title", "");
-    s.difficulty = j.value("difficulty", "");
-
-    if (j.contains("tags") && j["tags"].is_array()) {
-        for (const auto& t : j["tags"]) {
-            if (t.is_string()) {
-                s.tags.push_back(t.get<std::string>());
-            }
-        }
-    }
-    return s;
-}
-
-static cc::contracts::ProblemDetail from_json_detail(const json& j) {
-    cc::contracts::ProblemDetail d;
-    d.id         = j.value("id", "");
-    d.title      = j.value("title", "");
-    d.difficulty = j.value("difficulty", "");
-    d.statement  = j.value("statement", "");
-    //d.statementHtml = j.value("statementHtml", "");
-
-    if (j.contains("tags") && j["tags"].is_array()) {
-        for (const auto& t : j["tags"]) {
-            if (t.is_string()) {
-                d.tags.push_back(t.get<std::string>());
-            }
-        }
-    }
-
-    // Si tu DTO tiene más campos (constraints, inputFormat, etc),
-    // puedes mapearlos aquí de forma similar con j.value("campo", "").
-
-    return d;
-}
-
-static json to_json_detail(const cc::contracts::ProblemDetail& p) {
-    json j;
-    j["id"]            = p.id;
-    j["title"]         = p.title;
-    j["difficulty"]    = p.difficulty;
-    j["statement"]     = p.statement;
- //   j["statementHtml"] = p.statementHtml;
-    j["tags"]          = p.tags;
-
-    // Igual que arriba: si el DTO tiene más campos, agrégalos:
-    // j["constraints"] = p.constraints;
-    // ...
-
-    return j;
-}
-
-// ---------------------------------------------------------
-// list()
-// ---------------------------------------------------------
-
-std::vector<cc::contracts::ProblemSummary> ProblemsClient::list(
-    const std::string& category,
-    const std::string& difficulty
-) {
+std::vector<cc::contracts::ProblemSummary>
+ProblemsClient::list(const std::string& category,
+                     const std::string& difficulty)
+{
     std::string url = baseUrl_ + "/problems";
 
+    // Agregar query params si existen
     bool hasParams = false;
     if (!category.empty()) {
         url += hasParams ? "&" : "?";
@@ -103,56 +122,38 @@ std::vector<cc::contracts::ProblemSummary> ProblemsClient::list(
 
     Logger::debug("Fetching problems from: " + url);
 
+    std::vector<cc::contracts::ProblemSummary> problems;
+
     try {
         auto response = httpClient_.get(url);
 
         if (!response.isSuccess()) {
             Logger::error("Failed to fetch problems: HTTP "
                           + std::to_string(response.statusCode));
-            return {};
+            return problems;
         }
 
-        std::vector<cc::contracts::ProblemSummary> problems;
+        json arr = json::parse(response.body);
 
-        try {
-            auto j = json::parse(response.body);
-
-            // Puede ser un array directo: [ {...}, {...} ]
-            if (j.is_array()) {
-                for (const auto& item : j) {
-                    if (item.is_object()) {
-                        problems.push_back(from_json_summary(item));
-                    }
-                }
-            }
-            // O envuelto: { "items": [ ... ] }
-            else if (j.is_object() && j.contains("items") && j["items"].is_array()) {
-                for (const auto& item : j["items"]) {
-                    if (item.is_object()) {
-                        problems.push_back(from_json_summary(item));
-                    }
-                }
-            } else {
-                Logger::warn("Unexpected JSON format in ProblemsClient::list");
-            }
-
-        } catch (const json::parse_error& e) {
-            Logger::error(std::string("JSON parse error in ProblemsClient::list: ") + e.what());
-            return {};
+        if (!arr.is_array()) {
+            Logger::error("ProblemsClient::list — response is not an array");
+            return problems;
         }
 
-        Logger::info("Problems fetched successfully: " + std::to_string(problems.size()));
+        for (const auto& item : arr) {
+            problems.push_back(from_json_summary(item));
+        }
+
+        Logger::info("Problems fetched successfully: "
+                     + std::to_string(problems.size()));
         return problems;
 
     } catch (const std::exception& e) {
-        Logger::error("Exception in ProblemsClient::list: " + std::string(e.what()));
+        Logger::error(std::string("Exception in ProblemsClient::list: ")
+                      + e.what());
         return {};
     }
 }
-
-// ---------------------------------------------------------
-// get(id)
-// ---------------------------------------------------------
 
 std::optional<cc::contracts::ProblemDetail>
 ProblemsClient::get(const std::string& id) {
@@ -169,29 +170,18 @@ ProblemsClient::get(const std::string& id) {
             return std::nullopt;
         }
 
-        try {
-            auto j = json::parse(response.body);
-            if (!j.is_object()) {
-                Logger::warn("Unexpected JSON format in ProblemsClient::get");
-                return std::nullopt;
-            }
-            auto d = from_json_detail(j);
-            Logger::info("Problem detail fetched: " + d.id);
-            return d;
-        } catch (const json::parse_error& e) {
-            Logger::error(std::string("JSON parse error in ProblemsClient::get: ") + e.what());
-            return std::nullopt;
-        }
+        json j = json::parse(response.body);
+        auto detail = from_json_detail(j);
+
+        Logger::info("Problem detail fetched: " + id);
+        return detail;
 
     } catch (const std::exception& e) {
-        Logger::error("Exception in ProblemsClient::get: " + std::string(e.what()));
+        Logger::error(std::string("Exception in ProblemsClient::get: ")
+                      + e.what());
         return std::nullopt;
     }
 }
-
-// ---------------------------------------------------------
-// create()
-// ---------------------------------------------------------
 
 std::string ProblemsClient::create(const cc::contracts::ProblemDetail& problem) {
     std::string url = baseUrl_ + "/problems";
@@ -199,7 +189,7 @@ std::string ProblemsClient::create(const cc::contracts::ProblemDetail& problem) 
     Logger::info("Creating new problem: " + problem.title);
 
     try {
-        json bodyJson = to_json_detail(problem);
+        json bodyJson = to_json(problem);
         std::string body = bodyJson.dump();
 
         auto response = httpClient_.post(url, body);
@@ -210,50 +200,35 @@ std::string ProblemsClient::create(const cc::contracts::ProblemDetail& problem) 
             return "";
         }
 
+        // Se espera algo como { "id": "nuevo-id" }
+        std::string newId;
         try {
-            auto j = json::parse(response.body);
-
-            // Muchas APIs devuelven { "id": "..." }
-            if (j.is_object() && j.contains("id") && j["id"].is_string()) {
-                std::string newId = j["id"].get<std::string>();
-                Logger::info("Problem created successfully with id=" + newId);
-                return newId;
-            }
-
-            // o devuelven el problema completo
-            if (j.is_object() && j.contains("id")) {
-                std::string newId = j.value("id", "");
-                Logger::info("Problem created (full object) with id=" + newId);
-                return newId;
-            }
-
-            Logger::warn("Problem created but couldn't parse id from response");
-            return "";
-
-        } catch (const json::parse_error& e) {
-            Logger::error(std::string("JSON parse error in ProblemsClient::create: ") + e.what());
-            return "";
+            json resp = json::parse(response.body);
+            newId = resp.value("id", "");
+        } catch (...) {
+            // Si el servidor no devuelve JSON, igual damos un id vacío
+            Logger::warn("ProblemsClient::create — response body is not JSON");
         }
 
+        Logger::info("Problem created successfully, id = " + newId);
+        return newId;
+
     } catch (const std::exception& e) {
-        Logger::error("Exception in ProblemsClient::create: " + std::string(e.what()));
+        Logger::error(std::string("Exception in ProblemsClient::create: ")
+                      + e.what());
         return "";
     }
 }
 
-// ---------------------------------------------------------
-// update(id, problem)
-// ---------------------------------------------------------
-
 bool ProblemsClient::update(const std::string& id,
-                            const cc::contracts::ProblemDetail& problem) {
-
+                            const cc::contracts::ProblemDetail& problem)
+{
     std::string url = baseUrl_ + "/problems/" + id;
 
     Logger::info("Updating problem: " + id);
 
     try {
-        json bodyJson = to_json_detail(problem);
+        json bodyJson = to_json(problem);
         std::string body = bodyJson.dump();
 
         auto response = httpClient_.put(url, body);
@@ -269,14 +244,11 @@ bool ProblemsClient::update(const std::string& id,
         return success;
 
     } catch (const std::exception& e) {
-        Logger::error("Exception in ProblemsClient::update: " + std::string(e.what()));
+        Logger::error(std::string("Exception in ProblemsClient::update: ")
+                      + e.what());
         return false;
     }
 }
-
-// ---------------------------------------------------------
-// remove(id)
-// ---------------------------------------------------------
 
 bool ProblemsClient::remove(const std::string& id) {
     std::string url = baseUrl_ + "/problems/" + id;
@@ -297,7 +269,8 @@ bool ProblemsClient::remove(const std::string& id) {
         return success;
 
     } catch (const std::exception& e) {
-        Logger::error("Exception in ProblemsClient::remove: " + std::string(e.what()));
+        Logger::error(std::string("Exception in ProblemsClient::remove: ")
+                      + e.what());
         return false;
     }
 }
